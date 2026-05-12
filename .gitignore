@@ -1,0 +1,65 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+.Python
+build/
+dist/
+pip-wheel-metadata/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# --- Virtual environments ---
+env/
+venv/
+.venv/
+ENV/
+
+# --- LiveKit-wakeword artifacts (large, regenerable) ---
+data/                      # MUSAN (~6 hrs), MIT RIRs, ACAV100M features (~30 GB total)
+output/                    # generated synthetic audio, checkpoints, eval reports
+synthetic_data/            # legacy OpenWakeWord workflow
+synthetic_data_augmented/  # legacy OpenWakeWord workflow
+esc50/                     # auto-downloaded by augment_kitchen.py
+
+# --- Model artifacts (regeneratable from training) ---
+# Comment these out and force-add a specific .onnx if you want to commit a
+# released model snapshot: `git add -f hey_tara.onnx`
+*.onnx
+*.pt
+*.pth
+*.ckpt
+
+# --- Audio (large binaries) ---
+*.wav
+*.mp3
+*.flac
+*.ogg
+*.m4a
+# To commit a specific reference clip, force-add it: `git add -f path/to/clip.wav`
+
+# --- Local test / scratch output ---
+scores.txt
+*.log
+*.tmp
+nohup.out
+
+# --- IDE / OS ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Secrets / local config ---
+.env
+.env.local
+*.local.yaml
+
+# --- Jupyter ---
+.ipynb_checkpoints/

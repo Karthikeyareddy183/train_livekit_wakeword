@@ -1,0 +1,84 @@
+model_name: hey_tara
+
+target_phrases: ["hey tara"]
+
+# Production-scale config sized for RTX 5090 (24 GB VRAM, plenty of system RAM).
+# Approximate training time on a 5090: 45-75 min total (gen + augment + train).
+# To iterate faster while developing: drop n_samples to 10000, steps to 30000,
+# model_size to small. To go even bigger: bump steps to 150000.
+n_samples: 25000
+n_samples_val: 5000
+n_background_samples: 2000
+n_background_samples_val: 500
+tts_batch_size: 100
+
+# Adversarial negatives: phonetic confusables + common kitchen/recipe phrases +
+# cross-assistant trigger phrases so this model does not fire on other systems.
+custom_negative_phrases:
+  # Phonetic confusables ("hey ___" that rhymes with tara)
+  - "tara"
+  - "hey there"
+  - "hey terra"
+  - "hey tahra"
+  - "hey tiara"
+  - "hey sarah"
+  - "hey kara"
+  - "hey dara"
+  - "hey lara"
+  - "hey mara"
+  - "hey nara"
+  - "hey carry"
+  - "hey tarot"
+  - "hey terror"
+  - "hey tarry"
+  - "hey tear"
+  - "hey tar"
+  - "play tara"
+  - "they tar"
+  # Kitchen / recipe vocabulary
+  - "tarragon"
+  - "tara masala"
+  - "garam"
+  - "stir it"
+  - "tear it"
+  - "carry it"
+  - "is it ready"
+  - "hey honey"
+  - "hey babe"
+  # Cross-assistant guards
+  - "hey google"
+  - "hey siri"
+  - "alexa"
+  - "ok google"
+
+noise_scales: [0.98]
+noise_scale_ws: [0.98]
+length_scales: [0.75, 1.0, 1.25]
+slerp_weights: [0.2, 0.35, 0.5, 0.65, 0.8]
+
+data_dir: ./data
+output_dir: ./output
+
+augmentation:
+  clip_duration: 2.0
+  batch_size: 32
+  rounds: 3
+  background_paths: [./data/backgrounds]
+  rir_paths: [./data/rirs]
+
+model:
+  model_type: conv_attention
+  model_size: medium
+
+steps: 60000
+learning_rate: 0.0001
+weight_decay: 0.01
+label_smoothing: 0.05
+max_negative_weight: 3000
+target_fp_per_hour: 0.1
+
+batch_n_per_class:
+  positive: 50
+  adversarial_negative: 50
+  ACAV100M_sample: 2048
+  background_noise: 50

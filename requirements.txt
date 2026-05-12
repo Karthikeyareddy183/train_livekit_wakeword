@@ -1,0 +1,17 @@
+livekit-wakeword
+soundfile
+numpy
+librosa
+
+# Training dependencies for the Ubuntu / RTX 5090 box.
+# Inference-only deps live in requirements.txt.
+#
+# Before installing this file:
+#   1. Install system deps:  sudo apt install espeak-ng libsndfile1 ffmpeg sox portaudio19-dev
+#   2. Install PyTorch with CUDA 12.8+ for Blackwell (sm_120). See TRAINING.md.
+#   3. Use Python 3.11 or 3.12. webrtcvad has no prebuilt wheel for 3.13.
+
+livekit-wakeword[train,eval,export]
+soundfile
+numpy
+librosa
