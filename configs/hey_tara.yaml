@@ -2,15 +2,15 @@ model_name: hey_tara
 
 target_phrases: ["hey tara"]
 
-# Production-scale config sized for RTX 5090 (24 GB VRAM, plenty of system RAM).
-# Approximate training time on a 5090: 45-75 min total (gen + augment + train).
-# To iterate faster while developing: drop n_samples to 10000, steps to 30000,
-# model_size to small. To go even bigger: bump steps to 150000.
+# Production-scale config sized for Blackwell GPUs with >= 16 GB VRAM (e.g. RTX 5060 Ti, 5070, 5080, 5090).
+# Approximate training time on RTX 5060 Ti (16 GB): 75-120 min total (gen + augment + train).
+# On RTX 5090 (24 GB): can bump tts_batch_size to 100 and ACAV100M_sample to 2048 for ~45-75 min total.
+# To iterate faster while developing: drop n_samples to 10000, steps to 30000, model_size to small.
 n_samples: 25000
 n_samples_val: 5000
 n_background_samples: 2000
 n_background_samples_val: 500
-tts_batch_size: 100
+tts_batch_size: 50
 
 # Adversarial negatives: phonetic confusables + common kitchen/recipe phrases +
 # cross-assistant trigger phrases so this model does not fire on other systems.
@@ -80,5 +80,5 @@ target_fp_per_hour: 0.1
 batch_n_per_class:
   positive: 50
   adversarial_negative: 50
-  ACAV100M_sample: 2048
+  ACAV100M_sample: 1024
   background_noise: 50

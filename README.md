@@ -1,12 +1,12 @@
 # train_livekit_wakeword
 
-Training the `Hey Tara` wake word on Ubuntu + RTX 5090. End-to-end the first run takes about **1.5–2 hours**: ~30–45 min for the one-time dataset download, ~45–75 min for actual training. Subsequent runs (no re-download) take ~45–75 min.
+Training the `Hey Tara` wake word on Ubuntu with a Blackwell GPU (RTX 5060 Ti / 5070 / 5080 / 5090 — anything with ≥16 GB VRAM and sm_120). End-to-end the first run takes about **2–3 hours**: ~30–45 min for the one-time dataset download, ~75–120 min for actual training on a 5060 Ti (less on bigger cards). Subsequent runs (no re-download) take ~75–120 min.
 
 ---
 
 ## Quick start (two commands)
 
-After cloning, on the Ubuntu / RTX 5090 box:
+After cloning, on the Ubuntu / Blackwell GPU box:
 
 ```bash
 # one-time environment prep
@@ -32,7 +32,7 @@ The detailed step-by-step below is the manual equivalent of what these scripts d
 ## 0. Prerequisites
 
 - Ubuntu 22.04 or 24.04
-- NVIDIA driver supporting RTX 5090 (Blackwell, sm_120) — driver version **≥ 570**
+- NVIDIA driver supporting Blackwell (sm_120) — driver version **≥ 570**. Verified working on RTX 5060 Ti (16 GB), 5070, 5080, 5090.
 - Python **3.11 or 3.12** (do NOT use 3.13 — `webrtcvad`, a transitive dep, has no prebuilt wheel for 3.13 and source-build is brittle)
 - ~50 GB free disk for the dataset cache under `./data/`
 - Internet (one-time dataset download is ~30 GB)
@@ -43,7 +43,7 @@ Verify the driver:
 nvidia-smi
 ```
 
-Should show `NVIDIA GeForce RTX 5090` and CUDA Version 12.8 or higher.
+Should show your Blackwell GPU (e.g. `NVIDIA GeForce RTX 5060 Ti` / `5090`) and CUDA Version 12.8 or higher.
 
 ---
 
@@ -74,7 +74,7 @@ python -m pip install --upgrade pip
 
 ## 3. Install PyTorch with Blackwell (sm_120) support
 
-The 5090 needs CUDA 12.8+ kernels. Stable PyTorch (as of late 2025) may or may not ship sm_120 — check first, fall back to nightly if needed.
+Blackwell cards (5060 Ti / 5070 / 5080 / 5090) need CUDA 12.8+ kernels. Stable PyTorch (as of late 2025) may or may not ship sm_120 — check first, fall back to nightly if needed.
 
 ```bash
 # Try stable first
@@ -85,7 +85,7 @@ Verify the GPU is recognized:
 
 ```bash
 python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
-# expected: True NVIDIA GeForce RTX 5090
+# expected: True NVIDIA GeForce RTX 5060 Ti (or whichever Blackwell card you have)
 ```
 
 If you see `False`, or get a `no kernel image is available for execution on the device` error during training, install the nightly build instead:
@@ -158,7 +158,7 @@ The augmenter recursively scans `./data/backgrounds/`, so no config change is ne
 
 ## 7. Review the config
 
-Open `configs/hey_tara.yaml`. Key knobs already tuned for the 5090:
+Open `configs/hey_tara.yaml`. Key knobs already tuned for a 16 GB Blackwell card (RTX 5060 Ti):
 
 | Field | Value | Why |
 |---|---|---|
@@ -166,8 +166,8 @@ Open `configs/hey_tara.yaml`. Key knobs already tuned for the 5090:
 | `model.model_size` | `medium` (128-dim) | Plenty of VRAM headroom |
 | `steps` | 60000 | Solid convergence; bump to 100000 for max quality |
 | `augmentation.rounds` | 3 | Heavy acoustic variety |
-| `tts_batch_size` | 100 | Fills VRAM during TTS gen |
-| `ACAV100M_sample` | 2048 | Large random-speech negative pool per step |
+| `tts_batch_size` | 50 | Safe for 16 GB VRAM. On 24 GB cards bump to 100. |
+| `ACAV100M_sample` | 1024 | LiveKit prod default; bump to 2048 on 24 GB cards |
 | `target_fp_per_hour` | 0.1 | Tight FP target |
 
 For faster iteration during development, drop to:
@@ -187,15 +187,15 @@ This runs the full pipeline:
 3. `train` — 60000 steps of conv-attention classifier
 4. `export` — emit ONNX
 
-Approximate timing on RTX 5090:
+Approximate timing on RTX 5060 Ti (16 GB). Larger Blackwell cards (5090, etc.) are ~30–50% faster.
 
-| Phase | Time |
+| Phase | Time on 5060 Ti |
 |---|---|
-| Generate | 5–10 min |
-| Augment | 5–10 min |
-| Train (60k steps, medium) | 30–50 min |
+| Generate | 8–15 min |
+| Augment | 8–15 min |
+| Train (60k steps, medium) | 50–90 min |
 | Export | < 1 min |
-| **Total** | **~45–75 min** |
+| **Total** | **~75–120 min** |
 
 You can run sub-stages individually if you need to debug a single phase:
 
@@ -253,10 +253,10 @@ PyTorch doesn't have the right CUDA build for sm_120. Reinstall using the nightl
 Same root cause as above — install nightly PyTorch with CUDA 12.8+.
 
 **OOM during TTS generation.**
-Lower `tts_batch_size` from 100 to 50, or 32.
+Lower `tts_batch_size` from 50 to 32, or 16.
 
-**OOM during training (unlikely with 24 GB).**
-Lower `ACAV100M_sample` from 2048 to 1024, or `batch_n_per_class.positive` and `adversarial_negative` from 50 to 32.
+**OOM during training (possible on 16 GB cards).**
+Lower `ACAV100M_sample` from 1024 to 512, or `batch_n_per_class.positive` and `adversarial_negative` from 50 to 32.
 
 **Training appears stuck after `generate`.**
 The first augmentation round loads and convolves RIRs — first batch can take 2–4 min before progress prints resume. Subsequent rounds are much faster.
