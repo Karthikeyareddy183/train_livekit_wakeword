@@ -65,7 +65,8 @@ python -m pip install --upgrade pip --quiet
 # 4. PyTorch with CUDA 12.8 (Blackwell sm_120 support)
 print_header "4/5  PyTorch with CUDA 12.8+"
 echo "  Installing torch torchvision torchaudio from cu128 index..."
-pip install --quiet torch torchvision torchaudio \
+echo "  (~2-4 GB download incl. bundled CUDA libs - expect 5-15 min)"
+pip install torch torchvision torchaudio \
     --index-url https://download.pytorch.org/whl/cu128
 
 # Verify GPU is recognized; fall back to nightly if not
@@ -75,7 +76,7 @@ sys.exit(0 if torch.cuda.is_available() else 1)
 PY
 then
     echo "  Stable cu128 build did not detect GPU. Falling back to nightly cu128..."
-    pip install --quiet --upgrade --pre torch torchvision torchaudio \
+    pip install --upgrade --pre torch torchvision torchaudio \
         --index-url https://download.pytorch.org/whl/nightly/cu128
 fi
 
@@ -90,6 +91,7 @@ PY
 
 # 5. livekit-wakeword + audio libs
 print_header "5/5  livekit-wakeword + audio libs"
+echo "  (~500 MB download - expect 2-5 min)"
 pip install -r requirements.txt
 livekit-wakeword --help >/dev/null && echo "  livekit-wakeword CLI is callable"
 
