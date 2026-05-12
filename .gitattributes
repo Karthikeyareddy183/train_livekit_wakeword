@@ -1,0 +1,6 @@
+# Force LF line endings for shell scripts and YAML so they run cleanly on Ubuntu
+# (Windows checkouts won't break them, but Ubuntu won't tolerate CRLF in shebangs)
+*.sh   text eol=lf
+*.yaml text eol=lf
+*.yml  text eol=lf
+*.py   text eol=lf

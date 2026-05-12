@@ -4,6 +4,31 @@ Training the `Hey Tara` wake word on Ubuntu + RTX 5090. End-to-end the first run
 
 ---
 
+## Quick start (two commands)
+
+After cloning, on the Ubuntu / RTX 5090 box:
+
+```bash
+# one-time environment prep
+chmod +x setup.sh train.sh
+./setup.sh                    # apt deps + Python venv + PyTorch (cu128) + livekit-wakeword
+
+# every training run
+source env/bin/activate
+./train.sh                    # setup datasets (idempotent) + generate + augment + train + export
+```
+
+When `train.sh` finishes, the trained model is at `./hey_tara.onnx`. Full per-run log saved to `train_<timestamp>.log`.
+
+| Script | When | What it does |
+|---|---|---|
+| `setup.sh` | **Once** on a fresh machine | apt system deps → Python 3.12 venv → PyTorch cu128 (auto-falls-back to nightly if needed) → installs `requirements.txt` → verifies GPU |
+| `train.sh` | **Every** training run | `livekit-wakeword setup` (idempotent) → `livekit-wakeword run` → copies the exported ONNX to `./hey_tara.onnx` |
+
+The detailed step-by-step below is the manual equivalent of what these scripts do — useful for debugging or running individual stages.
+
+---
+
 ## 0. Prerequisites
 
 - Ubuntu 22.04 or 24.04
