@@ -63,7 +63,9 @@ augmentation:
   clip_duration: 2.0
   batch_size: 32
   rounds: 3
-  background_paths: [./data/backgrounds]
+  background_paths:
+    - ./data/backgrounds
+    - /home/cravv/Nithin/Conversational_ai/Wake_word_detection/data/backgrounds/kitchen/16k_mono
   rir_paths: [./data/rirs]
 
 model:
